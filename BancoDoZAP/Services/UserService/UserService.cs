@@ -53,7 +53,7 @@ namespace BancoDoZAP.Services.UserService
         public Usuario Logar()
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
               _                 _       
              | |               (_)      
@@ -66,11 +66,14 @@ namespace BancoDoZAP.Services.UserService
             ");
             Console.ResetColor();
 
-
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("CPF: ");
+            Console.ResetColor();
             string cpf = Console.ReadLine();
 
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("Senha: ");
+            Console.ResetColor();
             string senha = LerSenha();
 
             foreach (var usuario in Database.Database.Usuarios)

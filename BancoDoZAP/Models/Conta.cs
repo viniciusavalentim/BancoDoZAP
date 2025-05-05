@@ -52,6 +52,7 @@ namespace BancoDoZAP.Models
         {
             if (Sacar(valor))
             {
+                Console.WriteLine(destino.NumeroConta);
                 destino.Depositar(valor);
                 return true;
             }

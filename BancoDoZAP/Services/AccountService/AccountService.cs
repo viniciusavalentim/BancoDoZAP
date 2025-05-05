@@ -24,8 +24,8 @@ namespace BancoDoZAP.Services.AccountService
                               
             ");
             Console.ResetColor();
-
-            Console.Write("Valor: ");
+            Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
+            Console.Write("Valor: R$ ");
             double valor = double.Parse(Console.ReadLine());
             if (usuario.Conta.Sacar(valor))
             {
@@ -55,7 +55,8 @@ namespace BancoDoZAP.Services.AccountService
             ");
             Console.ResetColor();
 
-            Console.Write("Valor: ");
+            Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
+            Console.Write("Valor: R$ ");
             double valor = double.Parse(Console.ReadLine());
             if (valor > 0)
             {
@@ -84,7 +85,8 @@ namespace BancoDoZAP.Services.AccountService
                                                
             ");
             Console.ResetColor();
-            Console.Write("Valor: ");
+            Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
+            Console.Write("Valor: R$ ");
             double valor = double.Parse(Console.ReadLine());
 
 
@@ -98,20 +100,18 @@ namespace BancoDoZAP.Services.AccountService
 
             Console.Write("Número da conta de destino: ");
             int numeroContaDestino = int.Parse(Console.ReadLine());
-            Console.WriteLine(numeroContaDestino);
-            foreach (var contas in Database.Database.Contas)
-            {
-                Console.WriteLine($"{contas.NumeroConta}");
-            }
+
             if (valor <= 0)
             {
                 Console.WriteLine("Valor inválido.");
                 return;
             }
-            Conta contaDestino = Database.Database.Contas.FirstOrDefault(c => c.NumeroConta == numeroContaDestino);
+
+            Usuario contaDestino = Database.Database.Usuarios.FirstOrDefault(c => c.Conta.NumeroConta == numeroContaDestino);
             if (contaDestino != null)
             {
-                if (usuario.Conta.Transferir(valor, contaDestino))
+                Console.WriteLine($"{contaDestino.Conta.Saldo} + {contaDestino.Conta.NumeroConta}");
+                if (usuario.Conta.Transferir(valor, contaDestino.Conta))
                 {
                     Console.WriteLine($"Transferência de R$ {valor} realizada com sucesso!");
                 }
