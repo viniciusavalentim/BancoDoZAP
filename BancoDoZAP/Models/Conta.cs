@@ -28,9 +28,10 @@ namespace BancoDoZAP.Models
             Saldo = saldo;
         }
 
-        public virtual void Depositar(double valor)
+        public virtual bool Depositar(double valor)
         {
             Saldo += valor;
+            return true;
         }
 
         public virtual bool Sacar(double valor)

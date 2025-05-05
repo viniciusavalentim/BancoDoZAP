@@ -1,6 +1,7 @@
 ﻿using BancoDoZAP.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,27 +16,85 @@ namespace BancoDoZAP.Services.AccountService
 
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine(@"
-               _____                      
-              / ____|                     
-             | (___   __ _  ___ __ _ _ __ 
-              \___ \ / _` |/ __/ _` | '__|
-              ____) | (_| | (_| (_| | |   
-             |_____/ \__,_|\___\__,_|_|   
-                              
-            ");
+    ███████╗ █████╗  ██████╗ █████╗ ██████╗ 
+    ██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗
+    ███████╗███████║██║     ███████║██████╔╝
+    ╚════██║██╔══██║██║     ██╔══██║██╔══██╗
+    ███████║██║  ██║╚██████╗██║  ██║██║  ██║
+    ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝
+    ");
             Console.ResetColor();
-            Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
-            Console.Write("Valor: R$ ");
-            double valor = double.Parse(Console.ReadLine());
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("Saldo atual: ");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine($"R$ {usuario.Conta.Saldo}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("Digite 0 para cancelar a operação");
+            Console.ResetColor();
+
+            double valor;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write("Valor do saque: R$ ");
+                string input = Console.ReadLine();
+
+                if (input == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\nOperação de saque cancelada pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!double.TryParse(input, out valor))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nValor inválido! Digite apenas números.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                if (valor <= 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nO valor do saque deve ser maior que zero.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                if (valor > usuario.Conta.Saldo)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\nSaldo insuficiente. Seu saldo atual é R$ {usuario.Conta.Saldo}");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                break;
+            }
+
             if (usuario.Conta.Sacar(valor))
             {
-                Console.WriteLine($"Saque de R$ {valor} realizado com sucesso!");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\nSaque de R$ {valor} realizado com sucesso!");
+                Console.WriteLine($"Novo saldo: R$ {usuario.Conta.Saldo}");
+                Console.ResetColor();
             }
             else
             {
-                Console.WriteLine("Saldo insuficiente ou valor inválido.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\nOcorreu um erro ao processar o saque.");
+                Console.ResetColor();
             }
-            Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+            Console.ResetColor();
+            Console.ReadKey();
         }
 
 
@@ -44,87 +103,225 @@ namespace BancoDoZAP.Services.AccountService
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine(@"
-              _____                       _ _             
-             |  __ \                     (_) |            
-             | |  | | ___ _ __   ___  ___ _| |_ __ _ _ __ 
-             | |  | |/ _ \ '_ \ / _ \/ __| | __/ _` | '__|
-             | |__| |  __/ |_) | (_) \__ \ | || (_| | |   
-             |_____/ \___| .__/ \___/|___/_|\__\__,_|_|   
-                         | |                              
-                         |_|                              
-            ");
+    ██████╗ ███████╗██████╗  ██████╗ ███████╗██╗████████╗ █████╗ ██████╗ 
+    ██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔════╝██║╚══██╔══╝██╔══██╗██╔══██╗
+    ██║  ██║█████╗  ██████╔╝██║   ██║███████╗██║   ██║   ███████║██████╔╝
+    ██║  ██║██╔══╝  ██╔═══╝ ██║   ██║╚════██║██║   ██║   ██╔══██║██╔══██╗
+    ██████╔╝███████╗██║     ╚██████╔╝███████║██║   ██║   ██║  ██║██║  ██║
+    ╚═════╝ ╚══════╝╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝                                                                  
+    ");
             Console.ResetColor();
 
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
-            Console.Write("Valor: R$ ");
-            double valor = double.Parse(Console.ReadLine());
-            if (valor > 0)
+            Console.WriteLine("Digite 0 para cancelar a operação");
+            Console.ResetColor();
+
+            double valor;
+            while (true)
             {
-                usuario.Conta.Depositar(valor);
-                Console.WriteLine($"Depósito de R$ {valor} realizado com sucesso!");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Valor do depósito: R$ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                string input = Console.ReadLine();
+
+                if (input == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\nOperação de depósito cancelada pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!double.TryParse(input, out valor))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nValor inválido! Digite apenas números.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                if (valor <= 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nO valor do depósito deve ser maior que zero.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                if (valor > 100000)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nValor máximo por depósito é de R$ 100.000,00");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                break;
+            }
+
+            if (usuario.Conta.Depositar(valor))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\nDepósito de {valor:C} realizado com sucesso!");
+                Console.WriteLine($"Novo saldo: {usuario.Conta.Saldo:C}");
+                Console.ResetColor();
             }
             else
             {
-                Console.WriteLine("Valor inválido.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\nOcorreu um erro ao processar o depósito.");
+                Console.ResetColor();
             }
-            Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
-        }
 
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+            Console.ResetColor();
+            Console.ReadKey();
+        }
 
         public void Transferir(Usuario usuario)
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
-          _______                   __          _      
-         |__   __|                 / _|        (_)     
-            | |_ __ __ _ _ __  ___| |_ ___ _ __ _ _ __ 
-            | | '__/ _` | '_ \/ __|  _/ _ \ '__| | '__|
-            | | | | (_| | | | \__ \ ||  __/ |  | | |   
-            |_|_|  \__,_|_| |_|___/_| \___|_|  |_|_|   
-                                               
-            ");
+    ████████╗██████╗  █████╗ ███╗   ██╗███████╗███████╗███████╗██████╗ ██╗██████╗ 
+    ╚══██╔══╝██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔════╝██╔════╝██╔══██╗██║██╔══██╗
+       ██║   ██████╔╝███████║██╔██╗ ██║███████╗█████╗  █████╗  ██████╔╝██║██████╔╝
+       ██║   ██╔══██╗██╔══██║██║╚██╗██║╚════██║██╔══╝  ██╔══╝  ██╔══██╗██║██╔══██╗
+       ██║   ██║  ██║██║  ██║██║ ╚████║███████║██║     ███████╗██║  ██║██║██║  ██║
+       ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
+    ");
+
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"\nSaldo atual: R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+            Console.WriteLine("Digite 0 em qualquer campo para cancelar a operação\n");
             Console.ResetColor();
-            Console.WriteLine($"Saldo atual: R$ {usuario.Conta.Saldo}");
-            Console.Write("Valor: R$ ");
-            double valor = double.Parse(Console.ReadLine());
 
-
-            Console.WriteLine();
-            Console.WriteLine("==== Lista de usuários para transferencia =====");
-            foreach (var usuarioData in Database.Database.Usuarios)
+            double valor;
+            while (true)
             {
-                Console.WriteLine($"Nome: {usuarioData.Nome} | CPF: {usuarioData.CPF} | Numero da Conta: {usuarioData.Conta.NumeroConta}");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Valor da transferência: R$ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                string valorInput = Console.ReadLine();
+
+                if (valorInput == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("\nOperação de transferência cancelada pelo usuário.");
+                    Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!double.TryParse(valorInput, NumberStyles.Any, CultureInfo.CreateSpecificCulture("pt-BR"), out valor))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nValor inválido! Use números no formato brasileiro (ex: 1500,50).");
+                    continue;
+                }
+
+                if (valor <= 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nO valor da transferência deve ser maior que zero.");
+                    continue;
+                }
+
+                if (valor > usuario.Conta.Saldo)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\nSaldo insuficiente. Seu saldo atual é R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+                    continue;
+                }
+
+                break;
             }
-            Console.WriteLine();
 
-            Console.Write("Número da conta de destino: ");
-            int numeroContaDestino = int.Parse(Console.ReadLine());
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("\n══════════════════════════════════════════════════");
+            Console.WriteLine("       LISTA DE USUÁRIOS PARA TRANSFERÊNCIA");
+            Console.WriteLine("══════════════════════════════════════════════════");
+            Console.ResetColor();
 
-            if (valor <= 0)
+            foreach (var usuarioData in Database.Database.Usuarios.Where(u => u.CPF != usuario.CPF))
             {
-                Console.WriteLine("Valor inválido.");
-                return;
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write($"Nome: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{usuarioData.Nome} ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("| Conta: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"{usuarioData.Conta.NumeroConta}");
+            }
+
+            int numeroContaDestino;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("\nNúmero da conta de destino: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                string contaInput = Console.ReadLine();
+
+                if (contaInput == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("\nOperação de transferência cancelada pelo usuário.");
+                    Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!int.TryParse(contaInput, out numeroContaDestino))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nNúmero da conta inválido! Digite apenas números.");
+                    continue;
+                }
+
+                if (numeroContaDestino == usuario.Conta.NumeroConta)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nVocê não pode transferir para sua própria conta.");
+                    continue;
+                }
+
+                break;
             }
 
             Usuario contaDestino = Database.Database.Usuarios.FirstOrDefault(c => c.Conta.NumeroConta == numeroContaDestino);
+
             if (contaDestino != null)
             {
-                Console.WriteLine($"{contaDestino.Conta.Saldo} + {contaDestino.Conta.NumeroConta}");
                 if (usuario.Conta.Transferir(valor, contaDestino.Conta))
                 {
-                    Console.WriteLine($"Transferência de R$ {valor} realizada com sucesso!");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"\nTransferência de R$ {valor.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+                    Console.WriteLine($"para {contaDestino.Nome} realizada com sucesso!");
+                    Console.WriteLine($"\nNovo saldo: R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
                 }
                 else
                 {
-                    Console.WriteLine("Saldo insuficiente ou valor inválido.");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("\nOcorreu um erro ao processar a transferência.");
                 }
             }
             else
             {
-                Console.WriteLine("Conta de destino não encontrada.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\nConta de destino não encontrada.");
             }
-            Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+            Console.ResetColor();
         }
     }
 }

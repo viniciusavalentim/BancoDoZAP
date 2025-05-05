@@ -13,30 +13,166 @@ namespace BancoDoZAP.Services.UserService
         {
             Console.Clear();
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
-              _____            _     _             
-             |  __ \          (_)   | |            
-             | |__) |___  __ _ _ ___| |_ _ __ ___  
-             |  _  // _ \/ _` | / __| __| '__/ _ \ 
-             | | \ \  __/ (_| | \__ \ |_| | | (_) |
-             |_|  \_\___|\__, |_|___/\__|_|  \___/ 
-                          __/ |                    
-                         |___/                     
+               _____            _     _             
+              |  __ \          (_)   | |            
+              | |__) |___  __ _ _ ___| |_ _ __ ___  
+              |  _  // _ \/ _` | / __| __| '__/ _ \ 
+              | | \ \  __/ (_| | \__ \ |_| | | (_) |
+              |_|  \_\___|\__, |_|___/\__|_|  \___/ 
+                           __/ |                    
+                          |___/                     
             ");
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("Digite '0' em qualquer campo para cancelar o registro.");
             Console.ResetColor();
 
-            Console.Write("Nome: ");
-            string nome = Console.ReadLine();
+            string nome;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Nome: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                nome = Console.ReadLine();
 
-            Console.Write("CPF: ");
-            string cpf = Console.ReadLine();
+                if (nome == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
 
-            Console.Write("Telefone: ");
-            string telefone = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(nome))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O nome não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    break;
+                }
+            }
 
-            Console.Write("Senha: ");
-            string senha = LerSenha();
+            string cpf;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("CPF (apenas números): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                cpf = Console.ReadLine();
+
+                if (cpf == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(cpf))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O CPF não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (!ValidarCPF(cpf))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF inválido. Por favor, digite um CPF válido (11 dígitos).");
+                    Console.ResetColor();
+                }
+                else if (Database.Database.Usuarios.Any(u => u.CPF == cpf))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF já cadastrado. Por favor, use outro CPF.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            string telefone;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Telefone (com DDD, apenas números): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                telefone = Console.ReadLine();
+
+                if (telefone == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(telefone))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O telefone não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (!ValidarTelefone(telefone))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Telefone inválido. Por favor, digite um telefone válido (10 ou 11 dígitos).");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            string senha;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Senha (mínimo 6 caracteres): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                senha = LerSenha();
+
+                if (senha == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\nRegistro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(senha))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nA senha não pode estar vazia. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (senha.Length < 6)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nA senha deve ter no mínimo 6 caracteres. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine();
+                    break;
+                }
+            }
 
             Conta conta = new Conta(new Random().Next(1000, 9999), "0091", 0);
             Database.Database.Contas.Add(conta);
@@ -44,10 +180,13 @@ namespace BancoDoZAP.Services.UserService
             Usuario novoUsuario = new Usuario(nome, cpf, telefone, senha, conta);
             Database.Database.Usuarios.Add(novoUsuario);
 
-
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nUsuário registrado com sucesso!");
-            Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+            Console.ResetColor();
+
+            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
             Console.ReadKey();
+
         }
 
         public Usuario Logar()
@@ -55,26 +194,81 @@ namespace BancoDoZAP.Services.UserService
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
-              _                 _       
-             | |               (_)      
-             | |     ___   __ _ _ _ __  
-             | |    / _ \ / _` | | '_ \ 
-             | |___| (_) | (_| | | | | |
-             |______\___/ \__, |_|_| |_|
-                           __/ |        
-                          |___/         
+                _                 _       
+               | |               (_)      
+               | |     ___   __ _ _ _ __  
+               | |    / _ \ / _` | | '_ \ 
+               | |___| (_) | (_| | | | | |
+               |______\___/ \__, |_|_| |_|
+                             __/ |        
+                            |___/         
             ");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("CPF: ");
+            Console.WriteLine("Digite '0' em qualquer campo para cancelar o login.");
             Console.ResetColor();
-            string cpf = Console.ReadLine();
 
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("Senha: ");
-            Console.ResetColor();
-            string senha = LerSenha();
+            string cpf;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("CPF (apenas números): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                cpf = Console.ReadLine();
+
+                if (cpf == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Login cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(cpf))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O CPF não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            string senha;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Senha: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                senha = LerSenha();
+
+                if (senha == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\nLogin cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(senha))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nA senha não pode estar vazia. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine();
+                    break;
+                }
+            }
 
             foreach (var usuario in Database.Database.Usuarios)
             {
@@ -82,10 +276,9 @@ namespace BancoDoZAP.Services.UserService
                 {
                     LogadoComSucesso();
 
-                    Console.WriteLine();
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Aguarde...");
-                    Thread.Sleep(1000); // Espera 1 segundo
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\nAguarde...");
+                    Thread.Sleep(1000);
 
                     Console.WriteLine("Estamos te encaminhando...");
                     Thread.Sleep(1000);
@@ -98,8 +291,10 @@ namespace BancoDoZAP.Services.UserService
                 }
             }
 
-            Console.WriteLine("\nEmail ou senha incorretos!");
-            Console.WriteLine("Pressione qualquer tecla para ir ao Painel...");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nCPF ou senha incorretos!");
+            Console.ResetColor();
+            Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
             Console.ReadKey();
             return null;
         }
@@ -107,45 +302,79 @@ namespace BancoDoZAP.Services.UserService
         public void ListarUsuarios()
         {
             Console.Clear();
-            Console.WriteLine("=== Lista de Usuários ===");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+    ██╗   ██╗███████╗██╗   ██╗ █████╗ ██████╗ ██╗ ██████╗ ███████╗
+    ██║   ██║██╔════╝██║   ██║██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝
+    ██║   ██║███████╗██║   ██║███████║██████╔╝██║██║   ██║███████╗
+    ██║   ██║╚════██║██║   ██║██╔══██║██╔══██╗██║██║   ██║╚════██║
+    ╚██████╔╝███████║╚██████╔╝██║  ██║██║  ██║██║╚██████╔╝███████║
+     ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚══════╝
+                                                                                                      
+                ");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("═══════════════════════════════════════════");
+            Console.ResetColor();
 
             if (Database.Database.Usuarios.Count == 0)
             {
-                Console.WriteLine("Nenhum usuário cadastrado.");
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("\n⚠  Nenhum usuário cadastrado.");
+                Console.ResetColor();
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("\n┌────────────────────────┬───────────────┬─────────────────┐");
+                Console.WriteLine("│         Nome           │      CPF      │  Número Conta   │");
+                Console.WriteLine("├────────────────────────┼───────────────┼─────────────────┤");
+
                 foreach (var usuario in Database.Database.Usuarios)
                 {
-                    Console.WriteLine($"Nome: {usuario.Nome} | CPF: {usuario.CPF} | Numero da Conta: {usuario.Conta.NumeroConta}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write($"│ {usuario.Nome,-22} ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write($"│ {FormatarCPF(usuario.CPF)}");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"│ {usuario.Conta.NumeroConta.ToString().PadRight(15)} │");
                 }
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("└────────────────────────┴───────────────┴─────────────────┘");
             }
 
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+            Console.ResetColor();
             Console.ReadKey();
         }
 
-        static string LerSenha()
+        private string FormatarCPF(string cpf)
+        {
+            return Convert.ToUInt64(cpf).ToString(@"000\.000\.000\-00");
+        }
+
+        private string LerSenha()
         {
             string senha = "";
-            ConsoleKeyInfo tecla;
+            ConsoleKeyInfo key;
 
             do
             {
-                tecla = Console.ReadKey(intercept: true);
+                key = Console.ReadKey(true);
 
-                if (tecla.Key == ConsoleKey.Backspace && senha.Length > 0)
+                if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
                 {
-                    senha = senha.Substring(0, senha.Length - 1);
-                    Console.Write("\b \b");
-                }
-                else if (!char.IsControl(tecla.KeyChar))
-                {
-                    senha += tecla.KeyChar;
+                    senha += key.KeyChar;
                     Console.Write("*");
                 }
-            }
-            while (tecla.Key != ConsoleKey.Enter);
+                else if (key.Key == ConsoleKey.Backspace && senha.Length > 0)
+                {
+                    senha = senha.Substring(0, (senha.Length - 1));
+                    Console.Write("\b \b");
+                }
+            } while (key.Key != ConsoleKey.Enter);
 
             return senha;
         }
@@ -153,18 +382,60 @@ namespace BancoDoZAP.Services.UserService
         static void LogadoComSucesso()
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine(@"
-              _                 _          _____            _ _              _        _  
-             | |               (_)        |  __ \          | (_)            | |      | | 
-             | |     ___   __ _ _ _ __    | |__) |___  __ _| |_ ______ _  __| | ___  | | 
-             | |    / _ \ / _` | | '_ \   |  _  // _ \/ _` | | |_  / _` |/ _` |/ _ \ | | 
-             | |___| (_) | (_| | | | | |  | | \ \  __/ (_| | | |/ / (_| | (_| | (_)  |_|
-             |______\___/ \__, |_|_| |_|  |_|  \_\___|\__,_|_|_/___\__,_|\__,_|\___/ (_|
-                           __/ |                                                         
-                          |___/                                                          
+    ██╗      ██████╗  ██████╗ ██╗███╗   ██╗    ██████╗ ███████╗ █████╗ ██╗     ██╗███████╗ █████╗ ██████╗  ██████╗ ██╗
+    ██║     ██╔═══██╗██╔════╝ ██║████╗  ██║    ██╔══██╗██╔════╝██╔══██╗██║     ██║╚══███╔╝██╔══██╗██╔══██╗██╔═══██╗██║
+    ██║     ██║   ██║██║  ███╗██║██╔██╗ ██║    ██████╔╝█████╗  ███████║██║     ██║  ███╔╝ ███████║██║  ██║██║   ██║██║
+    ██║     ██║   ██║██║   ██║██║██║╚██╗██║    ██╔══██╗██╔══╝  ██╔══██║██║     ██║ ███╔╝  ██╔══██║██║  ██║██║   ██║╚═╝
+    ███████╗╚██████╔╝╚██████╔╝██║██║ ╚████║    ██║  ██║███████╗██║  ██║███████╗██║███████╗██║  ██║██████╔╝╚██████╔╝██╗
+    ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝╚══════╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝
             ");
             Console.ResetColor();
+        }
+
+        private bool ValidarCPF(string cpf)
+        {
+            cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+            if (cpf.Length != 11)
+                return false;
+
+            if (cpf.All(c => c == cpf[0]))
+                return false;
+
+            int[] multiplicador1 = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] multiplicador2 = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            string tempCpf = cpf.Substring(0, 9);
+            int soma = 0;
+
+            for (int i = 0; i < 9; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador1[i];
+
+            int resto = soma % 11;
+            resto = resto < 2 ? 0 : 11 - resto;
+
+            string digito = resto.ToString();
+            tempCpf += digito;
+
+            soma = 0;
+            for (int i = 0; i < 10; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador2[i];
+
+            resto = soma % 11;
+            resto = resto < 2 ? 0 : 11 - resto;
+
+            digito += resto.ToString();
+
+            return cpf.EndsWith(digito);
+        }
+
+        private bool ValidarTelefone(string telefone)
+        {
+            telefone = new string(telefone.Where(char.IsDigit).ToArray());
+
+            return telefone.Length == 10 || telefone.Length == 11;
         }
     }
 }
