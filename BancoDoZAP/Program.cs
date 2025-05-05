@@ -2,6 +2,7 @@
 using BancoDoZAP.Models;
 using BancoDoZAP.Services.AccountService;
 using BancoDoZAP.Services.UserService;
+using NAudio.Wave;
 
 namespace BancoDoZap
 {
@@ -9,6 +10,7 @@ namespace BancoDoZap
     {
         static void Main(string[] args)
         {
+
             UserService usuarioService = new UserService();
             Usuario usuarioLogado = null;
 
@@ -75,6 +77,19 @@ namespace BancoDoZap
 
         static void MenuConta(Usuario usuario)
         {
+            try
+            {
+                using var audioFile = new AudioFileReader(@"c:\dev\zap.m4a");
+                using var outputDevice = new WaveOutEvent();
+                outputDevice.Init(audioFile);
+                outputDevice.Play();
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro ao tocar o áudio: " + ex.Message);
+            }
+
             AccountService accountService = new AccountService();
             Console.Title = $"Banco ZAP - Conta de {usuario.Nome}";
 

@@ -6,6 +6,10 @@ namespace BancoDoZAP.Database
 {
     public static class Database
     {
+
+
+
+
         public static List<Usuario> Usuarios = new List<Usuario>
         {
             new Usuario(
@@ -37,5 +41,7 @@ namespace BancoDoZAP.Database
             new Conta(2, "0091", 3300, 2),
             new Conta(3, "0091", 30, 3)
         };
+
+        public static List<Log> Logs = new List<Log>();
     }
 }

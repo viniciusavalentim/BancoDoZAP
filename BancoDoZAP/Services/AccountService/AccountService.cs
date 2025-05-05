@@ -1,4 +1,5 @@
 ﻿using BancoDoZAP.Models;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -91,10 +92,14 @@ namespace BancoDoZAP.Services.AccountService
                 Console.ResetColor();
             }
 
+            Log log = new Log();
+            log.CriarLog("Saque", Enums.TypeLog.Saque, usuario, valor, "Saque");           
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
             Console.ResetColor();
             Console.ReadKey();
+
         }
 
 
@@ -175,6 +180,10 @@ namespace BancoDoZAP.Services.AccountService
                 Console.WriteLine("\nOcorreu um erro ao processar o depósito.");
                 Console.ResetColor();
             }
+
+
+            Log log = new Log("Deposito", Enums.TypeLog.Saque, usuario);
+            log.CriarLog("Deposito", Enums.TypeLog.Saque, usuario, valor, "Deposito");
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
@@ -318,6 +327,9 @@ namespace BancoDoZAP.Services.AccountService
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nConta de destino não encontrada.");
             }
+
+            Log log = new Log("Transferencia", Enums.TypeLog.Transferencia, usuario);
+            log.CriarLog("Transferencia", Enums.TypeLog.Transferencia, usuario, valor, "Transferencia", contaDestino);
 
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
