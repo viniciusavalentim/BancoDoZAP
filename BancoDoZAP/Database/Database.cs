@@ -23,14 +23,14 @@ namespace BancoDoZAP.Database
                 cpf: "321",
                 telefone: "(21) 99876-5432",
                 senha: "1234",
-                conta: new Conta(2, "0091", 0, 2)
+                conta: new Conta(2, "0091", 3232, 2)
             ),
             new Usuario(
                 nome: "Pedro Santos",
                 cpf: "555",
                 telefone: "(31) 95555-6666",
                 senha: "1234",
-                conta: new Conta(3, "0091", 0, 3)
+                conta: new Conta(3, "0091", 2120, 3)
             )
         };
 
@@ -95,6 +95,11 @@ namespace BancoDoZAP.Database
 
                         if (valores.Length > 6)
                             log.TypeLogAccount = valores[6];
+
+                        if (valores.Length > 7 && int.TryParse(valores[7], out int usuarioRecebidoId))
+                        {
+                            log.UsuarioRecebido = Usuarios.FirstOrDefault(u => u.Conta.Id == usuarioRecebidoId);
+                        }
 
                         Logs.Add(log);
                     }
