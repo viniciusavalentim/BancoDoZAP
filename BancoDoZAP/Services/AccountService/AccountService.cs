@@ -1,4 +1,5 @@
-﻿using BancoDoZAP.Models;
+﻿using BancoDoZAP.Enums;
+using BancoDoZAP.Models;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -93,13 +94,11 @@ namespace BancoDoZAP.Services.AccountService
             }
 
             Log log = new Log();
-            log.CriarLog("Saque", Enums.TypeLog.Saque, usuario, valor, "Saque");           
+            log.CriarLog("Saque", Enums.TypeLog.Saque, usuario, valor, "Saque");
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
             Console.ResetColor();
-            Console.ReadKey();
-
         }
 
 
@@ -183,12 +182,11 @@ namespace BancoDoZAP.Services.AccountService
 
 
             Log log = new Log("Deposito", Enums.TypeLog.Saque, usuario);
-            log.CriarLog("Deposito", Enums.TypeLog.Saque, usuario, valor, "Deposito");
+            log.CriarLog("Deposito", Enums.TypeLog.Deposito, usuario, valor, "Deposito");
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
             Console.ResetColor();
-            Console.ReadKey();
         }
 
         public void Transferir(Usuario usuario)
@@ -335,5 +333,182 @@ namespace BancoDoZAP.Services.AccountService
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
             Console.ResetColor();
         }
+
+
+        public void VisualizarRelatório()
+        {
+            Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine(@"
+    ██████╗ ███████╗██╗      █████╗ ████████╗ ██████╗ ██████╗ ██╗ ██████╗ 
+    ██╔══██╗██╔════╝██║     ██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗██║██╔═══██╗
+    ██████╔╝█████╗  ██║     ███████║   ██║   ██║   ██║██████╔╝██║██║   ██║
+    ██╔══██╗██╔══╝  ██║     ██╔══██║   ██║   ██║   ██║██╔══██╗██║██║   ██║
+    ██║  ██║███████╗███████╗██║  ██║   ██║   ╚██████╔╝██║  ██║██║╚██████╔╝
+    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ 
+    ");
+            Console.ResetColor();
+
+            var usuariosComuns = Database.Database.Usuarios.Where(u => u.TypeUser != "adm").ToList();
+
+            if (!usuariosComuns.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\nNão há usuários comuns cadastrados para visualizar relatórios.");
+                Console.ResetColor();
+                Console.WriteLine("\nPressione qualquer tecla para voltar...");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.WriteLine("\n══════════════════════════════════════════════════");
+            Console.WriteLine("             USUÁRIOS DISPONÍVEIS");
+            Console.WriteLine("══════════════════════════════════════════════════");
+            Console.ResetColor();
+
+            // Lista os usuários disponíveis
+            foreach (var usuario in usuariosComuns)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write($"ID: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{usuario.Conta.Id} ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("| Nome: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{usuario.Nome} ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("| Conta: ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{usuario.Conta.NumeroConta} ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("| Saldo: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"R$ {usuario.Conta.Saldo.ToString("N2")}");
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\nDigite a conta do usuário para ver o relatório (ou 0 para cancelar):");
+            Console.ResetColor();
+
+            int idUsuario;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write("► ");
+                string input = Console.ReadLine();
+
+                if (input == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\nOperação cancelada pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("\nPressione qualquer tecla para voltar...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!int.TryParse(input, out idUsuario))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nID inválido! Digite apenas números.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                var usuarioSelecionado = usuariosComuns.FirstOrDefault(u => u.Conta.NumeroConta == idUsuario);
+                if (usuarioSelecionado == null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nID não encontrado! Digite um ID válido da lista.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                break;
+            }
+
+            var usuarioRelatorio = usuariosComuns.First(u => u.Conta.NumeroConta == idUsuario);
+            var logsUsuario = Database.Database.Logs.Where(l => l.Usuario?.Conta?.NumeroConta == idUsuario).ToList();
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("════════════════════════════════════════════════════════════════════");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"\n        RELATÓRIO DO USUÁRIO: {usuarioRelatorio.Nome.ToUpper()}");
+            Console.WriteLine($"        CONTA: {usuarioRelatorio.Conta.NumeroConta}");
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write("        SALDO ATUAL: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"R$ {usuarioRelatorio.Conta.Saldo.ToString("N2")}");
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("════════════════════════════════════════════════════════════════════");
+            Console.ResetColor();
+
+            if (!logsUsuario.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\nNenhuma operação registrada para este usuário.");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("{0,-5} {1,-25} {2,-20} {3,-15} {4,-15}",
+                                  "ID", "Data/Hora", "Operação", "Valor", "Destinatário");
+                Console.WriteLine("════════════════════════════════════════════════════════════════════════════════════════════");
+                Console.ResetColor();
+
+                foreach (var log in logsUsuario.OrderByDescending(l => l.DataHora))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write($"{log.Id,-5} ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write($"{log.DataHora,-25:dd/MM/yyyy HH:mm:ss} ");
+
+                    // Cor baseada no tipo de operação
+                    switch (log.Tipo)
+                    {
+                        case TypeLog.Deposito:
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            break;
+                        case TypeLog.Saque:
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            break;
+                        case TypeLog.Transferencia:
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+                        default:
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+                    }
+
+                    Console.Write($"{log.Tipo,-20} ");
+                    Console.Write($"R$ {log.Value.ToString("N2"),-13} ");
+
+                    if (log.UsuarioRecebido != null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write($" {log.UsuarioRecebido.Nome}");
+                    }
+
+                    Console.WriteLine();
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\n════════════════════════════════════════════════════════════════════════════════════════════");
+            Console.WriteLine($"Total de operações: {logsUsuario.Count}");
+            Console.WriteLine("\nPressione qualquer tecla para voltar...");
+            Console.ResetColor();
+            Console.ReadKey();
+        }
+
     }
 }

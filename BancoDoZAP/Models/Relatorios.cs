@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BancoDoZAP.Services.UserService
+namespace BancoDoZAP.Models
 {
-    interface IUserInterface
+    class Relatorios
     {
     }
 }

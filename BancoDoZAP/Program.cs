@@ -97,7 +97,6 @@ namespace BancoDoZap
             {
                 Console.Clear();
 
-                // 1ª COR PRINCIPAL (Verde escuro) - Banner e elementos estruturais
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine(@"
  ██████╗  █████╗ ███╗   ██╗ ██████╗ ██████╗     ██████╗  ██████╗     ███████╗ █████╗ ██████╗ 
@@ -108,7 +107,16 @@ namespace BancoDoZap
  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝     ╚═════╝  ╚═════╝     ╚══════╝╚═╝  ╚═╝╚═╝   
                 ");
 
-                // 2ª COR (Verde claro) - Títulos e divisórias
+                if (usuario.TypeUser == "adm")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("   ┌──────────────────────────────────────────────┐");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("   │           ACESSO DE ADMINISTRADOR            │");
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("   └──────────────────────────────────────────────┘");
+                }
+
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("\n┌══════════════════════════════════════════════════════════════┐");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -116,7 +124,8 @@ namespace BancoDoZap
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("└══════════════════════════════════════════════════════════════┘");
 
-                // DESTAQUE DO SALDO - 3ª COR (Amarelo) + Branco para valores
+
+
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("\n   ┌──────────────────────────────────────────────┐");
                 Console.Write("   │ ");
@@ -128,15 +137,17 @@ namespace BancoDoZap
                 Console.WriteLine("");
                 Console.WriteLine("   └──────────────────────────────────────────────┘\n");
 
-                // MENU - Branco para opções principais
                 Console.ForegroundColor = ConsoleColor.DarkCyan;
                 Console.WriteLine("   [1] » Sacar");
                 Console.WriteLine("   [2] » Depositar");
                 Console.WriteLine("   [3] » Transferir");
-                Console.ForegroundColor = ConsoleColor.DarkGray; // Reutilizando a 1ª cor para a opção de saída
+                if (usuario.TypeUser == "adm")
+                {
+                    Console.WriteLine("   [4] » Ver relatório");
+                }
+                Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("   [0] » Sair da Conta\n");
 
-                // INPUT - Verde claro (2ª cor) + Branco para entrada
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("   ► Escolha uma opção: ");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -155,6 +166,10 @@ namespace BancoDoZap
                         break;
                     case "3":
                         accountService.Transferir(usuario);
+                        Console.ReadKey();
+                        break;
+                    case "4" when usuario.TypeUser == "adm":
+                        accountService.VisualizarRelatório();
                         Console.ReadKey();
                         break;
                     case "0":
