@@ -15,14 +15,12 @@ namespace BancoDoZAP.Services.UserService
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
-               _____            _     _             
-              |  __ \          (_)   | |            
-              | |__) |___  __ _ _ ___| |_ _ __ ___  
-              |  _  // _ \/ _` | / __| __| '__/ _ \ 
-              | | \ \  __/ (_| | \__ \ |_| | | (_) |
-              |_|  \_\___|\__, |_|___/\__|_|  \___/ 
-                           __/ |                    
-                          |___/                     
+    ██████╗ ███████╗ ██████╗ ██╗███████╗████████╗██████╗  ██████╗ 
+    ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗
+    ██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   ██████╔╝██║   ██║
+    ██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══██╗██║   ██║
+    ██║  ██║███████╗╚██████╔╝██║███████║   ██║   ██║  ██║╚██████╔╝
+    ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ 
             ");
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -53,6 +51,24 @@ namespace BancoDoZAP.Services.UserService
                     Console.WriteLine("O nome não pode estar vazio. Por favor, digite novamente.");
                     Console.ResetColor();
                 }
+                else if (nome.Any(char.IsDigit))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O nome não pode conter números. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (System.Text.RegularExpressions.Regex.IsMatch(nome, @"[^\p{L}\sçÇ]"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O nome não pode conter caracteres especiais (exceto ç). Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (nome.Length < 2)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O nome deve conter dois ou mais caracteres. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
                 else
                 {
                     break;
@@ -63,7 +79,7 @@ namespace BancoDoZAP.Services.UserService
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("CPF (apenas números): ");
+                Console.Write("CPF (apenas números ou formato 000.000.000-00): ");
                 Console.ForegroundColor = ConsoleColor.White;
                 cpf = Console.ReadLine();
 
@@ -82,14 +98,32 @@ namespace BancoDoZAP.Services.UserService
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("O CPF não pode estar vazio. Por favor, digite novamente.");
                     Console.ResetColor();
+                    continue;
                 }
-                else if (!ValidarCPF(cpf))
+
+                bool formatoValido = System.Text.RegularExpressions.Regex.IsMatch(cpf, @"^\d{3}\.\d{3}\.\d{3}-\d{2}$");
+
+                string cpfNumerico = new string(cpf.Where(char.IsDigit).ToArray());
+
+                if (cpf.Length != 11 && !formatoValido)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("CPF inválido. Por favor, digite um CPF válido (11 dígitos).");
+                    Console.WriteLine("Formato inválido. Use apenas números ou o formato 000.000.000-00.");
                     Console.ResetColor();
                 }
-                else if (Database.Database.Usuarios.Any(u => u.CPF == cpf))
+                else if (cpfNumerico.Length != 11)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF deve conter 11 dígitos. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (!ValidarCPF(cpfNumerico))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF inválido. Por favor, digite um CPF válido.");
+                    Console.ResetColor();
+                }
+                else if (Database.Database.Usuarios.Any(u => u.CPF == cpfNumerico))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("CPF já cadastrado. Por favor, use outro CPF.");
@@ -97,6 +131,7 @@ namespace BancoDoZAP.Services.UserService
                 }
                 else
                 {
+                    cpf = cpfNumerico; 
                     break;
                 }
             }
@@ -194,14 +229,13 @@ namespace BancoDoZAP.Services.UserService
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
-                _                 _       
-               | |               (_)      
-               | |     ___   __ _ _ _ __  
-               | |    / _ \ / _` | | '_ \ 
-               | |___| (_) | (_| | | | | |
-               |______\___/ \__, |_|_| |_|
-                             __/ |        
-                            |___/         
+    ██╗      ██████╗  ██████╗ ██╗███╗   ██╗
+    ██║     ██╔═══██╗██╔════╝ ██║████╗  ██║
+    ██║     ██║   ██║██║  ███╗██║██╔██╗ ██║
+    ██║     ██║   ██║██║   ██║██║██║╚██╗██║
+    ███████╗╚██████╔╝╚██████╔╝██║██║ ╚████║
+    ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝
+                                       
             ");
             Console.ResetColor();
 
