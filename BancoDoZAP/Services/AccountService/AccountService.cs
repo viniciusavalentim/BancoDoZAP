@@ -313,6 +313,12 @@ namespace BancoDoZAP.Services.AccountService
                     Console.WriteLine($"\nTransferência de R$ {valor.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
                     Console.WriteLine($"para {contaDestino.Nome} realizada com sucesso!");
                     Console.WriteLine($"\nNovo saldo: R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+                    Log log = new Log("Transferencia", Enums.TypeLog.Transferencia, usuario);
+                    log.CriarLog("Transferencia", Enums.TypeLog.Transferencia, usuario, valor, "Transferencia", contaDestino);
+
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                    Console.ResetColor();
                 }
                 else
                 {
@@ -325,13 +331,6 @@ namespace BancoDoZAP.Services.AccountService
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nConta de destino não encontrada.");
             }
-
-            Log log = new Log("Transferencia", Enums.TypeLog.Transferencia, usuario);
-            log.CriarLog("Transferencia", Enums.TypeLog.Transferencia, usuario, valor, "Transferencia", contaDestino);
-
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
-            Console.ResetColor();
         }
 
 
