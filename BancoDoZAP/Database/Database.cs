@@ -11,7 +11,7 @@ namespace BancoDoZAP.Database
         public static List<Usuario> Usuarios = new List<Usuario>
         {
             new Usuario(
-                nome: "João Silva",
+                nome: "Paula Tejando",
                 cpf: "123",
                 telefone: "(11) 91234-5678",
                 senha: "1234",
@@ -19,14 +19,14 @@ namespace BancoDoZAP.Database
                 typeUser: "adm"
             ),
             new Usuario(
-                nome: "Maria Souza",
+                nome: "Cuca Beludo",
                 cpf: "321",
                 telefone: "(21) 99876-5432",
                 senha: "1234",
                 conta: new Conta(2, "0091", 3232, 2)
             ),
             new Usuario(
-                nome: "Pedro Santos",
+                nome: "Zeca Gado",
                 cpf: "555",
                 telefone: "(31) 95555-6666",
                 senha: "1234",
