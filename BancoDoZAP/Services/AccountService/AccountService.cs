@@ -24,7 +24,7 @@ namespace BancoDoZAP.Services.AccountService
     ╚════██║██╔══██║██║     ██╔══██║██╔══██╗
     ███████║██║  ██║╚██████╗██║  ██║██║  ██║
     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝
-    ");
+        ");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -79,7 +79,9 @@ namespace BancoDoZAP.Services.AccountService
                 break;
             }
 
-            if (usuario.Conta.Sacar(valor))
+            var saque = Database.Database.Sacar(usuario.Conta.Id, valor);
+
+            if (saque && usuario.Conta.Sacar(valor))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"\nSaque de R$ {valor} realizado com sucesso!");
@@ -166,7 +168,9 @@ namespace BancoDoZAP.Services.AccountService
                 break;
             }
 
-            if (usuario.Conta.Depositar(valor))
+            var deposito = Database.Database.Depositar(usuario.Conta.NumeroConta, valor);
+
+            if (deposito && usuario.Conta.Depositar(valor))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"\nDepósito de {valor:C} realizado com sucesso!");
@@ -256,7 +260,7 @@ namespace BancoDoZAP.Services.AccountService
             Console.WriteLine("══════════════════════════════════════════════════");
             Console.ResetColor();
 
-            foreach (var usuarioData in Database.Database.Usuarios.Where(u => u.CPF != usuario.CPF))
+            foreach (var usuarioData in Database.Database.ListarUsuarios().Where(u => u.CPF != usuario.CPF))
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write($"Nome: ");
@@ -303,11 +307,12 @@ namespace BancoDoZAP.Services.AccountService
                 break;
             }
 
-            Usuario contaDestino = Database.Database.Usuarios.FirstOrDefault(c => c.Conta.NumeroConta == numeroContaDestino);
+            Usuario contaDestino = Database.Database.ListarUsuarios().FirstOrDefault(c => c.Conta.NumeroConta == numeroContaDestino);
 
             if (contaDestino != null)
             {
-                if (usuario.Conta.Transferir(valor, contaDestino.Conta))
+                var transferencia = Database.Database.Transferir(usuario.Conta.Id, contaDestino.Conta.Id, valor);
+                if (transferencia && usuario.Conta.Transferir(valor, contaDestino.Conta))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"\nTransferência de R$ {valor.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");

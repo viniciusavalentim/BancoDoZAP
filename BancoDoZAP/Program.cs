@@ -1,16 +1,19 @@
-﻿using System;
-using BancoDoZAP.Models;
+﻿using BancoDoZAP.Models;
 using BancoDoZAP.Services.AccountService;
 using BancoDoZAP.Services.UserService;
+using Microsoft.Data.Sqlite;
 using NAudio.Wave;
+using System;
 
 namespace BancoDoZap
 {
     class Program
     {
+        static string connectionString = "Data Source=bancodozap3.0.db";
+
         static void Main(string[] args)
         {
-
+            CriarTabela();
             UserService usuarioService = new UserService();
             Usuario usuarioLogado = null;
 
@@ -74,6 +77,106 @@ namespace BancoDoZap
                 }
             }
         }
+
+        static void CriarTabela()
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Pessoa (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Nome TEXT NOT NULL,
+                    CPF TEXT NOT NULL UNIQUE,
+                    Telefone TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS Administrador (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Nome TEXT NOT NULL,
+                    CPF TEXT NOT NULL UNIQUE,
+                    Telefone TEXT,
+                    Cargo TEXT NOT NULL,
+                    DataAdmissao TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS Conta (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    NumeroConta INTEGER NOT NULL,
+                    Agencia TEXT NOT NULL,
+                    Saldo REAL NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS Usuario (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Nome TEXT NOT NULL,
+                    CPF TEXT NOT NULL UNIQUE,
+                    Telefone TEXT,
+                    TypeUser TEXT NOT NULL,
+                    Senha TEXT NOT NULL,
+                    ContaId INTEGER,
+                    FOREIGN KEY (ContaId) REFERENCES Conta(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS Log (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Descricao TEXT NOT NULL,
+                    DataHora TEXT NOT NULL,
+                    Tipo TEXT NOT NULL,
+                    Value REAL NOT NULL,
+                    TypeLogAccount TEXT,
+                    UsuarioId INTEGER,
+                    UsuarioRecebidoId INTEGER,
+                    FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+                    FOREIGN KEY (UsuarioRecebidoId) REFERENCES Usuario(Id)
+                )";
+                tableCmd.ExecuteNonQuery();
+            }
+        }
+
+        static void InserirPessoa(string nome, int idade)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var insertCmd = connection.CreateCommand();
+                insertCmd.CommandText = "INSERT INTO Pessoas (Nome, Idade) VALUES ($nome, $idade)";
+                insertCmd.Parameters.AddWithValue("$nome", nome);
+                insertCmd.Parameters.AddWithValue("$idade", idade);
+
+                insertCmd.ExecuteNonQuery();
+            }
+
+            Console.WriteLine("✅ Pessoa inserida com sucesso!");
+        }
+
+        static void ListarPessoas()
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var selectCmd = connection.CreateCommand();
+                selectCmd.CommandText = "SELECT Id, Nome, Idade FROM Pessoas";
+
+                using (var reader = selectCmd.ExecuteReader())
+                {
+                    Console.WriteLine("\n📋 Pessoas cadastradas:");
+                    while (reader.Read())
+                    {
+                        var id = reader.GetInt32(0);
+                        var nome = reader.GetString(1);
+                        var idade = reader.GetInt32(2);
+
+                        Console.WriteLine($"{id} - {nome}, {idade} anos");
+                    }
+                }
+            }
+        }
+
 
         static void MenuConta(Usuario usuario)
         {

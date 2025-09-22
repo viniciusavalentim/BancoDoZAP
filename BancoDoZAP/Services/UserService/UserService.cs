@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,8 @@ namespace BancoDoZAP.Services.UserService
 {
     public class UserService
     {
+        public string connectionString = "Data Source=bancodozap3.0.db";
+
         public void Registrar()
         {
             Console.Clear();
@@ -83,6 +86,8 @@ namespace BancoDoZAP.Services.UserService
                 Console.ForegroundColor = ConsoleColor.White;
                 cpf = Console.ReadLine();
 
+                break;
+
                 if (cpf == "0")
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -131,9 +136,21 @@ namespace BancoDoZAP.Services.UserService
                 }
                 else
                 {
-                    cpf = cpfNumerico; 
+                    cpf = cpfNumerico;
                     break;
                 }
+            }
+
+            var usuarioExiste = Database.Database.UsuarioExiste(cpf);
+
+            if (usuarioExiste)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\nUsuário já cadastrado!");
+                Console.ResetColor();
+                Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                Console.ReadKey();
+                return;
             }
 
             string telefone;
@@ -210,18 +227,29 @@ namespace BancoDoZAP.Services.UserService
             }
 
             Conta conta = new Conta(new Random().Next(1000, 9999), "0091", 0);
-            Database.Database.Contas.Add(conta);
+            var createAccount = Database.Database.CriarConta(conta.NumeroConta, conta.Agencia, conta.Saldo);
 
             Usuario novoUsuario = new Usuario(nome, cpf, telefone, senha, conta);
-            Database.Database.Usuarios.Add(novoUsuario);
+            var createUser = Database.Database.RegistrarUsuario(nome, cpf, telefone, novoUsuario.TypeUser, senha);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\nUsuário registrado com sucesso!");
-            Console.ResetColor();
+            var newUserAccount = Database.Database.VincularContaAoUsuario(createUser, createAccount);
 
-            Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
-            Console.ReadKey();
-
+            if (newUserAccount)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\nUsuário registrado com sucesso!");
+                Console.ResetColor();
+                Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\nNâo foi possível cadastrar o usuário!");
+                Console.ResetColor();
+                Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                Console.ReadKey();
+            }
         }
 
         public Usuario Logar()
@@ -304,9 +332,12 @@ namespace BancoDoZAP.Services.UserService
                 }
             }
 
-            foreach (var usuario in Database.Database.Usuarios)
+            var validarUsuario = Database.Database.UsuarioExiste(cpf);
+
+            if (validarUsuario)
             {
-                if (usuario.CPF == cpf && usuario.ValidarSenha(senha))
+                var logarUsuario = Database.Database.LogarUsuario(cpf, senha);
+                if (logarUsuario != null)
                 {
                     LogadoComSucesso();
 
@@ -321,8 +352,9 @@ namespace BancoDoZAP.Services.UserService
                     Thread.Sleep(1000);
 
                     Console.ResetColor();
-                    return usuario;
+                    return logarUsuario;
                 }
+
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -351,7 +383,9 @@ namespace BancoDoZAP.Services.UserService
             Console.WriteLine("═══════════════════════════════════════════");
             Console.ResetColor();
 
-            if (Database.Database.Usuarios.Count == 0)
+            var users = Database.Database.ListarUsuarios();
+
+            if (users.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("\n⚠  Nenhum usuário cadastrado.");
@@ -364,7 +398,7 @@ namespace BancoDoZAP.Services.UserService
                 Console.WriteLine("│         Nome           │      CPF      │  Número Conta   │");
                 Console.WriteLine("├────────────────────────┼───────────────┼─────────────────┤");
 
-                foreach (var usuario in Database.Database.Usuarios)
+                foreach (var usuario in users)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write($"│ {usuario.Nome,-22} ");

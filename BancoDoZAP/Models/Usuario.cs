@@ -11,7 +11,7 @@ namespace BancoDoZAP.Models
         public int Id { get; set; }
         public Conta Conta { get; set; }
         public string TypeUser { get; set; } = string.Empty;
-        private string Senha;
+        public string Senha { get; set; }
 
 
         public Usuario(string nome, string cpf, string telefone, string senha, Conta conta)
@@ -20,6 +20,8 @@ namespace BancoDoZAP.Models
             this.Senha = senha;
             Conta = conta;
         }
+
+
 
         public Usuario(string nome, string cpf, string telefone, string senha, Conta conta, string typeUser)
             : base(nome, cpf, telefone)
