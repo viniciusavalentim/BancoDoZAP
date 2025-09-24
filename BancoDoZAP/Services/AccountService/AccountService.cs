@@ -1099,6 +1099,74 @@ namespace BancoDoZAP.Services.AccountService
             }
         }
 
+        private string ValidarCPFPix()
+        {
+            string cpf;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("CPF (apenas números ou formato 000.000.000-00): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                cpf = Console.ReadLine();
+
+                if (cpf == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return "0";
+                }
+
+                if (string.IsNullOrWhiteSpace(cpf))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O CPF não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                bool formatoValido = System.Text.RegularExpressions.Regex.IsMatch(cpf, @"^\d{3}\.\d{3}\.\d{3}-\d{2}$");
+
+                string cpfNumerico = new string(cpf.Where(char.IsDigit).ToArray());
+
+                if (cpf.Length != 11 && !formatoValido)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Formato inválido. Use apenas números ou o formato 000.000.000-00.");
+                    Console.ResetColor();
+                }
+                else if (cpfNumerico.Length != 11)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF deve conter 11 dígitos. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (!ValidateCPF(cpfNumerico))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("CPF inválido. Por favor, digite um CPF válido.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    cpf = cpfNumerico;
+                    if (!ConfirmarChavePix("CPF", cpf))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Vamos tentar novamente.\n");
+                        Console.ResetColor();
+                        continue;
+                    }
+
+                    break;
+                }
+            }
+
+            return cpf;
+        }
+
 
         private string ValidarCPF()
         {
@@ -1267,6 +1335,54 @@ namespace BancoDoZAP.Services.AccountService
             return telefone;
         }
 
+        private string validateTelefonePix()
+        {
+            string telefone;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Telefone (com DDD, apenas números): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                telefone = Console.ReadLine();
+
+                if (telefone == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return "0";
+                }
+
+                if (string.IsNullOrWhiteSpace(telefone))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O telefone não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                }
+                else if (!ValidarTelefone(telefone))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Telefone inválido. Por favor, digite um telefone válido (10 ou 11 dígitos).");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    if (!ConfirmarChavePix("Telefone", telefone))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Vamos tentar novamente.\n");
+                        Console.ResetColor();
+                        continue;
+                    }
+
+                    break;
+                }
+            }
+
+            return telefone;
+        }
         private string ValidarEmail()
         {
             string email;
@@ -1310,6 +1426,59 @@ namespace BancoDoZAP.Services.AccountService
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Email já cadastrado em nossa base. Por favor, use outro email.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                if (!ConfirmarChavePix("E-mail", email))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Vamos tentar novamente.\n");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                break;
+            }
+
+            return email;
+        }
+
+        private string ValidarEmailPix()
+        {
+            string email;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Email (ex: usuario123@dominio.com ou usuario1@dominio.com.br): ");
+                Console.ForegroundColor = ConsoleColor.White;
+                email = Console.ReadLine();
+
+                if (email == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Registro cancelado pelo usuário.");
+                    Console.ResetColor();
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao menu...");
+                    Console.ReadKey();
+                    return "0";
+                }
+
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("O email não pode estar vazio. Por favor, digite novamente.");
+                    Console.ResetColor();
+                    continue;
+                }
+
+                string pattern = @"^(?=[^@]*[a-zA-Z])[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+                bool formatoValido = System.Text.RegularExpressions.Regex.IsMatch(email, pattern);
+
+                if (!formatoValido)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Formato de email inválido.");
                     Console.ResetColor();
                     continue;
                 }
@@ -1388,7 +1557,7 @@ namespace BancoDoZAP.Services.AccountService
         {
             Console.Clear();
 
-            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(@"
     ███████╗ █████╗ ███████╗███████╗██████╗     ██████╗ ██╗██╗  ██╗
     ██╔════╝██╔══██╗╚══███╔╝██╔════╝██╔══██╗    ██╔══██╗██║╚██╗██╔╝
@@ -1399,32 +1568,86 @@ namespace BancoDoZAP.Services.AccountService
         ");
             Console.ResetColor();
 
-            decimal valorPix = LerValorPix();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine($"\nSaldo atual: R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+            Console.WriteLine("Digite 0 em qualquer campo para cancelar a operação\n");
+            Console.ResetColor();
 
-            // 2) Escolher a chave para onde vai enviar
-            // buscar as chaves do usuário ou de destino? Se for enviar para outro usuário, você deveria
-            // pedir o tipo de chave + valor da chave. Aqui vou supor que você pede tipo + valor manualmente.
+            double valorPix;
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("Valor do PIX: R$ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                string valorInput = Console.ReadLine();
 
-            // Exibir menu de tipos de chave
+                if (valorInput == "0")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("\nOperação de pix cancelada pelo usuário.");
+                    Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+
+                if (!double.TryParse(valorInput, NumberStyles.Any, CultureInfo.CreateSpecificCulture("pt-BR"), out valorPix))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nValor inválido! Use números no formato brasileiro (ex: 1500,50).");
+                    continue;
+                }
+
+                if (valorPix <= 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nO valor do pix deve ser maior que zero.");
+                    continue;
+                }
+
+                if (valorPix > usuario.Conta.Saldo)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\nSaldo insuficiente. Seu saldo atual é R$ {usuario.Conta.Saldo.ToString("N2", CultureInfo.CreateSpecificCulture("pt-BR"))}");
+                    continue;
+                }
+
+                break;
+            }
+
+
             var tipos = new List<string> { "CPF", "Telefone", "E-mail", "Chave Aleatória" };
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\nEscolha o tipo de chave para o destinatário:");
+            Console.ResetColor();
+
             for (int i = 0; i < tipos.Count; i++)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
                 Console.Write($" [{i + 1}] » {tipos[i]}");
                 Console.ResetColor();
                 Console.WriteLine();
             }
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(" [0] » Cancelar");
+            Console.ResetColor();
 
             int escolhaTipo = -1;
             while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("Digite o número da opção: ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("\nDigite o número da opção: ");
                 Console.ResetColor();
                 string inputTipo = Console.ReadLine()?.Trim();
 
+                if (escolhaTipo == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Operação cancelada.");
+                    Console.ResetColor();
+                    return;
+                }
                 if (string.IsNullOrWhiteSpace(inputTipo))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -1441,13 +1664,6 @@ namespace BancoDoZAP.Services.AccountService
                     continue;
                 }
 
-                if (escolhaTipo == 0)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Operação cancelada.");
-                    Console.ResetColor();
-                    return;
-                }
 
                 if (escolhaTipo < 1 || escolhaTipo > tipos.Count)
                 {
@@ -1467,13 +1683,13 @@ namespace BancoDoZAP.Services.AccountService
             switch (tipoChaveSelecionada)
             {
                 case "CPF":
-                    chaveDestinatario = ValidarCPF();
+                    chaveDestinatario = ValidarCPFPix();
                     break;
                 case "Telefone":
-                    chaveDestinatario = validateTelefone();
+                    chaveDestinatario = validateTelefonePix();
                     break;
                 case "E-mail":
-                    chaveDestinatario = ValidarEmail();
+                    chaveDestinatario = ValidarEmailPix();
                     break;
                 case "Chave Aleatória":
                     chaveDestinatario = Console.ReadLine(); ;
@@ -1482,16 +1698,23 @@ namespace BancoDoZAP.Services.AccountService
 
             if (string.IsNullOrEmpty(chaveDestinatario) || chaveDestinatario == "0")
             {
-                // cancelado ou erro
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Operação de Pix cancelada ou chave inválida.");
                 Console.ResetColor();
                 return;
             }
 
-            var usuarioDestino = Database.Database.BuscarUsuarioPorChavePix(MascaraCPF(chaveDestinatario), tipoChaveSelecionada);   
+            var usuarioDestino = Database.Database.BuscarUsuarioPorChavePix(tipoChaveSelecionada, chaveDestinatario);
+            
+            if (usuarioDestino == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Chave Pix não encontrada. Verifique os dados e tente novamente.");
+                Console.ResetColor();
+                return;
+            }
 
-            bool confirmado = ConfirmarOperacao(tipoChaveSelecionada, chaveDestinatario, valorPix, usuarioDestino.CPF);
+            bool confirmado = ConfirmarOperacao(tipoChaveSelecionada, chaveDestinatario, valorPix, usuarioDestino.CPF, usuarioDestino);
 
             if (!confirmado)
             {
@@ -1524,51 +1747,6 @@ namespace BancoDoZAP.Services.AccountService
         }
 
 
-
-        private decimal LerValorPix()
-        {
-            decimal valor;
-            while (true)
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("Digite o valor do Pix em R$ (ex: 100,50): ");
-                Console.ResetColor();
-                string entrada = Console.ReadLine()?.Trim();
-
-                if (string.IsNullOrWhiteSpace(entrada))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Valor não pode estar vazio.");
-                    Console.ResetColor();
-                    continue;
-                }
-
-                // Substituir vírgula por ponto, ou permitir vírgula, conforme cultura
-                entrada = entrada.Replace(',', '.');
-
-                // Verifica se é decimal válido
-                if (!decimal.TryParse(entrada, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture, out valor))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Formato inválido. Digite apenas números e vírgula ou ponto para os centavos.");
-                    Console.ResetColor();
-                    continue;
-                }
-
-                if (valor <= 0)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Valor deve ser maior que zero.");
-                    Console.ResetColor();
-                    continue;
-                }
-
-                break;
-            }
-
-            return valor;
-        }
-
         private string MascaraCPF(string cpf)
         {
             if (string.IsNullOrWhiteSpace(cpf) || cpf.Length != 11 || !cpf.All(char.IsDigit))
@@ -1578,37 +1756,44 @@ namespace BancoDoZAP.Services.AccountService
             return $"{parte1}.***.***‑{cpf.Substring(9, 2)}";
         }
 
-        private bool ConfirmarOperacao(string tipoChave, string chave, decimal valor, string cpfUsuario)
+        private bool ConfirmarOperacao(string tipoChave, string chave, double valor, string cpfUsuario, Usuario user)
         {
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("Você está prestes a fazer um Pix com os seguintes dados:\n");
+                Console.Write("Você está prestes a fazer um Pix para:\n");
+
+                Console.Write("Nome: ");
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine(user.Nome);
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("Tipo de chave: ");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine(tipoChave);
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("Chave: ");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine(chave);
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("Valor: ");
-                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"R$ {valor:N2}");
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("CPF do remetente: ");
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine(MascaraCPF(cpfUsuario));
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(" [1] Sim ");
+                Console.Write("\n [1] Sim ");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[2] Não");
                 Console.ResetColor();

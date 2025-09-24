@@ -86,6 +86,8 @@ namespace BancoDoZAP.Services.UserService
                 Console.ForegroundColor = ConsoleColor.White;
                 cpf = Console.ReadLine();
 
+                break;
+
                 if (cpf == "0")
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -230,7 +232,16 @@ namespace BancoDoZAP.Services.UserService
             Usuario novoUsuario = new Usuario(nome, cpf, telefone, senha, conta);
             var createUser = Database.Database.RegistrarUsuario(nome, cpf, telefone, novoUsuario.TypeUser, senha);
 
+            if (createAccount == 0 || createUser == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Erro ao criar conta ou usuário.");
+                Console.ResetColor();
+                return;
+            }
+
             var newUserAccount = Database.Database.VincularContaAoUsuario(createUser, createAccount);
+
 
             if (newUserAccount)
             {

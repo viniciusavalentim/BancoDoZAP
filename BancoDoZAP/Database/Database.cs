@@ -888,11 +888,14 @@ namespace BancoDoZAP.Database
 
                 var cmd = connection.CreateCommand();
                 cmd.CommandText = @"
-            SELECT u.Id, u.Nome, u.CPF, c.Id as ContaId, c.Saldo
+            SELECT 
+                u.Id, u.Nome, u.CPF, u.Telefone, u.TypeUser, u.Senha,
+                c.Id as ContaId, c.NumeroConta, c.Agencia, c.Saldo
             FROM Usuario u
             INNER JOIN Conta c ON u.ContaId = c.Id
             INNER JOIN PixChave p ON p.ContaId = c.Id
             WHERE p.Tipo = $tipo AND p.Valor = $valor";
+                ;
 
                 cmd.Parameters.AddWithValue("$tipo", tipo);
                 cmd.Parameters.AddWithValue("$valor", valor);
@@ -901,7 +904,6 @@ namespace BancoDoZAP.Database
                 {
                     if (reader.Read())
                     {
-
                         var conta = new Conta(
                            id: reader.GetInt32(6),
                            numeroConta: reader.GetInt32(7),
@@ -931,13 +933,24 @@ namespace BancoDoZAP.Database
             return null;
         }
 
+        private static int BuscarUsuarioIdPorContaId(SqliteConnection connection, int contaId)
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Id FROM Usuario WHERE ContaId = $contaId";
+            cmd.Parameters.AddWithValue("$contaId", contaId);
+
+            object result = cmd.ExecuteScalar();
+            return result != null ? Convert.ToInt32(result) : -1;
+        }
+
+
 
         public static bool TransferirPorChavePix(
             int contaOrigemId,
             string tipoDestino,
             string valorDestino,
-            decimal valorTransferencia)
-                {
+            double valorTransferencia)
+        {
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
@@ -949,23 +962,23 @@ namespace BancoDoZAP.Database
                         var cmdDestino = connection.CreateCommand();
                         cmdDestino.Transaction = transaction;
                         cmdDestino.CommandText = @"
-                    SELECT c.Id, c.Saldo
-                    FROM Conta c
-                    INNER JOIN PixChave p ON p.ContaId = c.Id
-                    WHERE p.Tipo = $tipoDestino AND p.Valor = $valorDestino";
+                        SELECT c.Id, c.Saldo
+                        FROM Conta c
+                        INNER JOIN PixChave p ON p.ContaId = c.Id
+                        WHERE p.Tipo = $tipoDestino AND p.Valor = $valorDestino";
 
                         cmdDestino.Parameters.AddWithValue("$tipoDestino", tipoDestino);
                         cmdDestino.Parameters.AddWithValue("$valorDestino", valorDestino);
 
                         int contaDestinoId = -1;
-                        decimal saldoDestino = 0;
+                        double saldoDestino = 0;
 
                         using (var reader = cmdDestino.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 contaDestinoId = reader.GetInt32(reader.GetOrdinal("Id"));
-                                saldoDestino = reader.GetDecimal(reader.GetOrdinal("Saldo"));
+                                saldoDestino = reader.GetDouble(reader.GetOrdinal("Saldo"));
                             }
                         }
 
@@ -984,7 +997,7 @@ namespace BancoDoZAP.Database
                         cmdOrigem.CommandText = "SELECT Saldo FROM Conta WHERE Id = $id";
                         cmdOrigem.Parameters.AddWithValue("$id", contaOrigemId);
 
-                        decimal saldoOrigem = (decimal)cmdOrigem.ExecuteScalar();
+                        double saldoOrigem = (double)cmdOrigem.ExecuteScalar();
 
                         if (saldoOrigem < valorTransferencia)
                         {
@@ -1012,22 +1025,31 @@ namespace BancoDoZAP.Database
                         var cmdLog = connection.CreateCommand();
                         cmdLog.Transaction = transaction;
                         cmdLog.CommandText = @"
-                    INSERT INTO LogTransferencia (ContaOrigemId, ContaDestinoId, Valor, Data)
-                    VALUES ($origem, $destino, $valor, $data)";
-                        cmdLog.Parameters.AddWithValue("$origem", contaOrigemId);
-                        cmdLog.Parameters.AddWithValue("$destino", contaDestinoId);
+                        INSERT INTO Log (Descricao, DataHora, Tipo, Value, TypeLogAccount, UsuarioId, UsuarioRecebidoId)
+                        VALUES ($descricao, $dataHora, $tipo, $valor, $typeLogAccount, $usuarioId, $usuarioRecebidoId)";
+
+                        cmdLog.Parameters.AddWithValue("$descricao", $"Transferência Pix realizada de Conta {contaOrigemId} para Conta {contaDestinoId}");
+                        cmdLog.Parameters.AddWithValue("$dataHora", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        cmdLog.Parameters.AddWithValue("$tipo", "PIX");
                         cmdLog.Parameters.AddWithValue("$valor", valorTransferencia);
-                        cmdLog.Parameters.AddWithValue("$data", DateTime.Now);
+                        cmdLog.Parameters.AddWithValue("$typeLogAccount", "Saque");
+                        cmdLog.Parameters.AddWithValue("$usuarioId", BuscarUsuarioIdPorContaId(connection, contaOrigemId));
+                        cmdLog.Parameters.AddWithValue("$usuarioRecebidoId", BuscarUsuarioIdPorContaId(connection, contaDestinoId));
+
                         cmdLog.ExecuteNonQuery();
 
                         transaction.Commit();
                         return true;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Erro ao transferir Pix: " + ex.Message);
+                        Console.ResetColor();
                         transaction.Rollback();
                         return false;
                     }
+
                 }
             }
         }
