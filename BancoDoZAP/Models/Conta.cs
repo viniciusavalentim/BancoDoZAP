@@ -12,6 +12,7 @@ namespace BancoDoZAP.Models
         public int NumeroConta { get; protected set; }
         public string Agencia { get; set; }
         public double Saldo { get; protected set; }
+        public List<PixChave> PixChaves { get; set; }
 
         public Conta(int id, string agencia, double saldo, int numeroConta = 0)
         {
@@ -48,6 +49,56 @@ namespace BancoDoZAP.Models
             }
             return false;
         }
+
+        public bool CadastrarChavePix(string tipo, string valor)
+        {
+            if (PixChaves == null)
+            {
+                PixChaves = new List<PixChave>();
+            }
+            if (PixChaves.Any(c => c.Tipo == tipo && c.Valor == valor))
+            {
+                return false;
+            }
+            var novaChave = new PixChave
+            {
+                Id = PixChaves.Count > 0 ? PixChaves.Max(c => c.Id) + 1 : 1,
+                Tipo = tipo,
+                Valor = valor,
+                ContaId = this.Id
+            };
+            PixChaves.Add(novaChave);
+            return true;
+        }
+
+        public bool EditarChavePix(int id, string novoTipo, string novoValor)
+        {
+            var chaveExistente = PixChaves.FirstOrDefault(c => c.Id == id);
+            if (chaveExistente == null)
+            {
+                return false;
+            }
+            if (PixChaves.Any(c => c.Tipo == novoTipo && c.Valor == novoValor && c.Id != id))
+            {
+                return false;
+            }
+            chaveExistente.Tipo = novoTipo;
+            chaveExistente.Valor = novoValor;
+            return true;
+        }
+
+        public bool ExcluirChavePix(int id)
+        {
+            var chaveExistente = PixChaves.FirstOrDefault(c => c.Id == id);
+            if (chaveExistente == null)
+            {
+                return false;
+            }
+            PixChaves.Remove(chaveExistente);
+            return true;
+        }
+
+
 
         public bool Transferir(double valor, Conta destino)
         {

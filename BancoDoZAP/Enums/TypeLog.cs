@@ -13,6 +13,7 @@ namespace BancoDoZAP.Enums
         Transferencia,
         Deposito,
         Saque,
+        Pix,
         CriacaoConta,
     }
 }

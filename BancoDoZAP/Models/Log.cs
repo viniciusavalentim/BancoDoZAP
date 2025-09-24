@@ -86,6 +86,5 @@ namespace BancoDoZAP.Models
                 Console.WriteLine($"Erro ao salvar log no CSV: {ex.Message}");
             }
         }
-
     }
 }

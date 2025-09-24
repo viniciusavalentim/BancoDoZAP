@@ -86,8 +86,6 @@ namespace BancoDoZAP.Services.UserService
                 Console.ForegroundColor = ConsoleColor.White;
                 cpf = Console.ReadLine();
 
-                break;
-
                 if (cpf == "0")
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;

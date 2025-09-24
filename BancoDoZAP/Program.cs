@@ -120,6 +120,15 @@ namespace BancoDoZap
                     FOREIGN KEY (ContaId) REFERENCES Conta(Id)
                 );
 
+                CREATE TABLE IF NOT EXISTS PixChave (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Tipo TEXT NOT NULL,         
+                    Valor TEXT NOT NULL,       
+                    ContaId INTEGER NOT NULL,   
+                    UNIQUE(Tipo, ContaId),
+                    FOREIGN KEY (ContaId) REFERENCES Conta(Id)
+                );
+                
                 CREATE TABLE IF NOT EXISTS Log (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Descricao TEXT NOT NULL,
@@ -244,9 +253,11 @@ namespace BancoDoZap
                 Console.WriteLine("   [1] » Sacar");
                 Console.WriteLine("   [2] » Depositar");
                 Console.WriteLine("   [3] » Transferir");
+                Console.WriteLine("   [4] » Pix");
+                Console.WriteLine("   [5] » Suas Chaves");
                 if (usuario.TypeUser == "adm")
                 {
-                    Console.WriteLine("   [4] » Ver relatório");
+                    Console.WriteLine("   [6] » Ver relatório");
                 }
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("   [0] » Sair da Conta\n");
@@ -271,7 +282,14 @@ namespace BancoDoZap
                         accountService.Transferir(usuario);
                         Console.ReadKey();
                         break;
-                    case "4" when usuario.TypeUser == "adm":
+                    case "4":
+                        accountService.FazerPix(usuario);
+                        Console.ReadKey();
+                        break;
+                    case "5":
+                        accountService.SuasChaves(usuario);
+                        break;
+                    case "6" when usuario.TypeUser == "adm":
                         accountService.VisualizarRelatório();
                         Console.ReadKey();
                         break;
